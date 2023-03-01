@@ -233,6 +233,8 @@ namespace RedFoxMaths
         static Mat4 GetIndentityMatrix();
         
         Float4 GetMatLine(int index);
+        
+        bool operator==(const Mat4& pOther);
     };
     
     Mat4 operator*(const float& pMult, const Mat4& matrix);
@@ -867,8 +869,7 @@ namespace RedFoxMaths
     // ----------------------------[Matrix]----------------------------
 #pragma region Matrix
     
-    Mat4::Mat4()
-    {}
+    Mat4::Mat4() { }
     
     Mat4::Mat4(float matrix[4][4])
     {
@@ -1223,6 +1224,21 @@ namespace RedFoxMaths
             return 0;
         
         return (Float4)(mat[index][0], mat[index][1], mat[index][2], mat[index][3]);
+    }
+    
+    bool Mat4::operator==(const Mat4& pOther)
+    {
+        short int counter = 0;
+        for (int i=0; i < 16; i += 4)
+        {
+            bool check =
+                mat16[i]     == pOther.mat16[i]     &&
+                mat16[i + 1] == pOther.mat16[i + 1] &&
+                mat16[i + 2] == pOther.mat16[i + 2] &&
+                mat16[i + 3] == pOther.mat16[i + 3];
+            counter += check;
+        }
+        return counter;
     }
 #pragma endregion
     
