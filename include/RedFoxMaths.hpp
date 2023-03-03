@@ -214,7 +214,7 @@ namespace RedFoxMaths
         static Mat4 CreateTransformMatrix(const Float3& position, const Float3& rotationDEG, const Float3& pScale);
         static Mat4 CreateTransformMatrix(const Float3& position, const Quaternion& rotation, const Float3& pScale);
         
-        static Mat4 GetOrthograpPhicMatrix(float pRight, float pLeft, float pTop, float pBottom, float pFar, float pNear);
+        static Mat4 GetOrthographicMatrix(float pRight, float pLeft, float pTop, float pBottom, float pFar, float pNear);
         static Mat4 GetPerspectiveMatrix(float aspect, float FOV, float pFar, float pNear);
         
         Mat4 operator*(const Mat4& pOther) const;
@@ -227,10 +227,10 @@ namespace RedFoxMaths
         Mat4 GetTransposedMatrix();
         
         float GetDeterminent();
-        Mat4 GetComplementaryMat();
-        Mat4 GetCoMatrix();
+        Mat4 GetComplementaryMat(); //TO TEST
+        Mat4 GetCoMatrix();         //TO TEST
         Mat4 GetInverseMatrix();
-        static Mat4 GetIndentityMatrix();
+        static Mat4 GetIdentityMatrix();
         
         Float4 GetMatLine(int index);
         
@@ -1076,7 +1076,7 @@ namespace RedFoxMaths
         return GetTranslation(position) * rotation.GetRotationMatrix() * GetScale(pScale);
     }
     
-    Mat4 Mat4::GetOrthograpPhicMatrix(float pRight, float pLeft, float pTop, float pBottom, float pFar, float pNear)
+    Mat4 Mat4::GetOrthographicMatrix(float pRight, float pLeft, float pTop, float pBottom, float pFar, float pNear)
     {
         float result[4][4] = {
             {2.f / (pRight - pLeft), 0.f, 0.f, -(pRight + pLeft) / (pRight - pLeft)},
@@ -1147,7 +1147,7 @@ namespace RedFoxMaths
             ;
     }
     
-    Mat4 Mat4::GetIndentityMatrix()
+    Mat4 Mat4::GetIdentityMatrix()
     {
         Mat4 res;
         float matrice[4][4] = {
@@ -1213,7 +1213,7 @@ namespace RedFoxMaths
         float det = GetDeterminent();
         
         if (Misc::Abs(det) < 0.000005f)
-            return GetIndentityMatrix();
+            return GetIdentityMatrix();
         
         return GetComplementaryMat() * (1.f / det);
     }

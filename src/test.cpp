@@ -4,11 +4,15 @@
 #include <string>
 #include <string.h>
 
+// TODO(vegasword): Some functions need to check their result by hand
+// TODO(vegasword): Iterations (for loop for each test to stress test)
+// TODO(vegasword): Random float macro
+
 #include <cglm/cglm.h>
 #include <cglm/vec2.h>
 #include <cglm/vec3.h>
 #include <cglm/mat4.h>
-#include <cglm/affine-pre.h>
+#include <cglm/affine.h>
 #include <cglm/types-struct.h>
 
 
@@ -20,9 +24,6 @@ using namespace RedFoxMaths;
 
 int main() 
 {
-    // TODO(vegasword): Replace every vecX by vecXs
-    // TODO(vegasword): Random float macro
-    // TODO(vegasword): Iterations (for loop for each test to stress test)
     
 #pragma region Float2Test
     {
@@ -164,15 +165,223 @@ int main()
     
     
 #pragma region Mat4
-    
     {
-        mat4 id, e;
+        mat4 id, ex;
         glm_mat4_identity(id);
-        glm_rotate_x(id, PI/2, e);
+        glm_rotate_x(id, PI/2, ex);
         Mat4 expected;
         float* expectedPtr = const_cast<float*>(expected.mat16);
-        expectedPtr = (float*)e;
+        expectedPtr = (float*)ex;
         Mat4GetRotationXTest(PI/2, expected);
+    }
+    {
+        mat4 id, ex;
+        glm_mat4_identity(id);
+        glm_rotate_y(id, PI/2, ex);
+        Mat4 expected;
+        float* expectedPtr = const_cast<float*>(expected.mat16);
+        expectedPtr = (float*)ex;
+        Mat4GetRotationYTest(PI/2, expected);
+    }
+    {
+        mat4 id, ex;
+        glm_mat4_identity(id);
+        glm_rotate_z(id, PI/2, ex);
+        Mat4 expected;
+        float* expectedPtr = const_cast<float*>(expected.mat16);
+        expectedPtr = (float*)ex;
+        Mat4GetRotationZTest(PI/2, expected);
+    }
+    {
+        mat4 id;
+        glm_mat4_identity(id);
+        glm_rotate(id, PI/2, new(vec3){1.f, 1.f, 1.f});
+        Mat4 expected;
+        float* expectedPtr = const_cast<float*>(expected.mat16);
+        expectedPtr = (float*)id;
+        Mat4GetRotationTest(PI/2, PI/2, PI/2, expected);
+    }
+    {
+        mat4 ex;
+        glm_mat4_identity(ex);
+        glm_translate(ex, new(vec3){2.f,3.f,4.f});
+        Mat4 expected;
+        float* expectedPtr = const_cast<float*>(expected.mat16);
+        expectedPtr = (float*)ex;
+        Mat4GetTranslationTest({2.f,3.f,4.f}, expected);
+    }
+    {
+        mat4 ex;
+        glm_mat4_identity(ex);
+        glm_scale(ex, new(vec3){2.f,3.f,4.f});
+        Mat4 expected;
+        float* expectedPtr = const_cast<float*>(expected.mat16);
+        expectedPtr = (float*)ex;
+        Mat4GetScaleTest({2.f,3.f,4.f}, expected);
+    }
+    {
+        mat4 ex;
+        glm_mat4_identity(ex);
+        glm_translate(ex, new(vec3){2.f,3.f,4.f});
+        glm_rotate(ex, PI/2, new(vec3){1.f, 1.f, 1.f});
+        glm_scale(ex, new(vec3){1.f,1.f,1.f});
+        Mat4 expected;
+        float* expectedPtr = const_cast<float*>(expected.mat16);
+        expectedPtr = (float*)ex;
+        Mat4TransformTest({2.f,3.f,4.f},{PI/2,PI/2,PI/2},{1.f,1.f,1.f}, expected);
+    }
+    {
+        mat4 ex; versor q;
+        glm_mat4_identity(ex);
+        glm_translate(ex, new(vec3){2.f,3.f,4.f});
+        glm_quat_identity(q);
+        glm_quat_rotate(ex, q, ex);
+        glm_scale(ex, new(vec3){1.f,1.f,1.f});
+        Mat4 expected;
+        float* expectedPtr = const_cast<float*>(expected.mat16);
+        expectedPtr = (float*)ex;
+        Mat4TransformQuatTest({2.f,3.f,4.f},{1.f,0.f,0.f,0.f},{1.f,1.f,1.f}, expected);
+    }
+    {
+        mat4 ex;
+        glm_mat4_identity(ex);
+        glm_ortho(1.f,2.f,3.f,4.f,5.f,6.f,ex);
+        Mat4 expected;
+        float* expectedPtr = const_cast<float*>(expected.mat16);
+        expectedPtr = (float*)ex;
+        Mat4OrthographicTest(2.f,1.f,4.f,3.f,6.f,5.f,expected);
+    }
+    {
+        mat4 ex;
+        glm_mat4_identity(ex);
+        glm_perspective(90.f,1.f,0.1f,100.f,ex);
+        Mat4 expected;
+        float* expectedPtr = const_cast<float*>(expected.mat16);
+        expectedPtr = (float*)ex;
+        Mat4PerspectiveTest(1.f,90.f,100.f,0.1f,expected);
+    }
+    {
+        vec4 l0 = {1.f,2.f,3.f,4.f};
+        vec4 l1 = {5.f,6.f,7.f,8.f};
+        vec4 l2 = {9.f,10.f,11.f,12.f};
+        vec4 l3 = {13.f,14.f,15.f,16.f};
+        
+        mat4 m1, ex;
+        glm_vec4_copy(l0, m1[0]);
+        glm_vec4_copy(l1, m1[1]);
+        glm_vec4_copy(l2, m1[2]);
+        glm_vec4_copy(l3, m1[3]);
+        glm_mat4_copy(m1, ex);
+        glm_mat4_transpose(ex);
+        
+        Mat4 mat1, expected;
+        float* mat1Ptr = const_cast<float*>(mat1.mat16);
+        mat1Ptr = (float*)m1;
+        float* expectedPtr = const_cast<float*>(expected.mat16);
+        expectedPtr = (float*)ex;
+        Mat4TransposeTest(mat1, expected);
+    }
+    {
+        vec4 l0 = {1.f,2.f,3.f,4.f};
+        vec4 l1 = {5.f,6.f,7.f,8.f};
+        vec4 l2 = {9.f,10.f,11.f,12.f};
+        vec4 l3 = {13.f,14.f,15.f,16.f};
+        
+        mat4 m1, ex;
+        glm_vec4_copy(l0, m1[0]);
+        glm_vec4_copy(l1, m1[1]);
+        glm_vec4_copy(l2, m1[2]);
+        glm_vec4_copy(l3, m1[3]);
+        glm_mat4_inv_fast(m1, ex);
+        
+        Mat4 mat1, expected;
+        float* mat1Ptr = const_cast<float*>(mat1.mat16);
+        mat1Ptr = (float*)m1;
+        float* expectedPtr = const_cast<float*>(expected.mat16);
+        expectedPtr = (float*)ex;
+        Mat4InverseTest(mat1, expected);
+    }
+    {
+        mat4 ex;
+        glm_mat4_identity(ex);
+        Mat4 expected;
+        float* expectedPtr = const_cast<float*>(expected.mat16);
+        expectedPtr = (float*)ex;
+        Mat4IdentityTest(expected);
+    }
+    {
+        vec4 l0 = {1.f,2.f,3.f,4.f};
+        vec4 l1 = {5.f,6.f,7.f,8.f};
+        vec4 l2 = {9.f,10.f,11.f,12.f};
+        vec4 l3 = {13.f,14.f,15.f,16.f};
+        
+        mat4 ex, m1, m2;
+        glm_vec4_copy(l0, m1[0]);
+        glm_vec4_copy(l1, m1[1]);
+        glm_vec4_copy(l2, m1[2]);
+        glm_vec4_copy(l3, m1[3]);
+        glm_vec4_copy(l3, m2[0]);
+        glm_vec4_copy(l2, m2[1]);
+        glm_vec4_copy(l1, m2[2]);
+        glm_vec4_copy(l0, m2[3]);
+        glm_mat4_mul(m1, m2, ex);
+        
+        Mat4 mat1, mat2, expected;
+        float* mat1Ptr = const_cast<float*>(mat1.mat16);
+        mat1Ptr = (float*)m1;
+        float* mat2Ptr = const_cast<float*>(mat2.mat16);
+        mat2Ptr = (float*)m2;
+        float* expectedPtr = const_cast<float*>(expected.mat16);
+        expectedPtr = (float*)ex;
+        Mat4MulTest(mat1, mat2, expected);
+    }
+    {
+        float s = 5.f;
+        vec4 l0 = {1.f,2.f,3.f,4.f};
+        vec4 l1 = {5.f,6.f,7.f,8.f};
+        vec4 l2 = {9.f,10.f,11.f,12.f};
+        vec4 l3 = {13.f,14.f,15.f,16.f};
+        
+        mat4 ex, m1;
+        glm_vec4_copy(l0, m1[0]);
+        glm_vec4_copy(l1, m1[1]);
+        glm_vec4_copy(l2, m1[2]);
+        glm_vec4_copy(l3, m1[3]);
+        glm_mat4_copy(m1, ex);
+        glm_mat4_scale(ex, s);
+        
+        Mat4 mat1, expected;
+        float* mat1Ptr = const_cast<float*>(mat1.mat16);
+        mat1Ptr = (float*)m1;
+        float* expectedPtr = const_cast<float*>(expected.mat16);
+        expectedPtr = (float*)ex;
+        Mat4MulSTest(mat1, s, expected);
+    }
+    {
+        vec4 s = {111.f, 222.f, 333.f, 444.f};
+        vec4 l0 = {1.f,2.f,3.f,4.f};
+        vec4 l1 = {5.f,6.f,7.f,8.f};
+        vec4 l2 = {9.f,10.f,11.f,12.f};
+        vec4 l3 = {13.f,14.f,15.f,16.f};
+        
+        mat4 m1; vec4 ex;
+        glm_vec4_copy(l0, m1[0]);
+        glm_vec4_copy(l1, m1[1]);
+        glm_vec4_copy(l2, m1[2]);
+        glm_vec4_copy(l3, m1[3]);
+        glm_mat4_mulv(m1, s, ex);
+        
+        Float4 scale({111.f, 222.f, 333.f, 444.f});
+        Mat4 mat1;
+        float* mat1Ptr = const_cast<float*>(mat1.mat16);
+        mat1Ptr = (float*)m1;
+        Float4 expected;
+        expected.x = ex[0];
+        expected.y = ex[1];
+        expected.z = ex[2];
+        expected.w = ex[3];
+        
+        Mat4MulVTest(scale, mat1, expected);
     }
     
 #pragma endregion
