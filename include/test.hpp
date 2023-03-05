@@ -2,6 +2,9 @@
 
 #pragma region TEST_IMPLEMENTATION
 
+static int testPassed = 0;
+static int testFailed = 0;
+
 #define TEST_START \
 LARGE_INTEGER start,end,frequency; \
 QueryPerformanceCounter(&start); \
@@ -21,14 +24,19 @@ if (result == pExpected) { \
 output += " passed in %lf ms (%lli cycle%s)\n"; \
 snprintf(buffer, 1024, output.c_str(), elapsedTime, cycles, (cycles > 1 ? "s" : "")); \
 OutputDebugStringA(buffer); \
+memset(buffer, 0, sizeof buffer); \
+testPassed++; \
+return true; \
 } \
 else { \
 output += std::string(" (") + __FILE__ + " at line " + std::to_string(__LINE__) + \
 ") failed (expected " + pExpectedFormat + ")\n"; \
 snprintf(buffer, 1024, output.c_str(), __VA_ARGS__); \
 OutputDebugStringA(buffer); \
-} \
 memset(buffer, 0, sizeof buffer); \
+testFailed++; \
+return false; \
+} \
 
 #define TEST_OUT_VEC2 \
 TEST_OUT("{%f %f} and got {%f %f}", \
@@ -44,6 +52,11 @@ result.x, result.y, result.z); \
 TEST_OUT("{%f %f %f %f} and got {%f %f %f %f}", \
 pExpected.x, pExpected.y, pExpected.z, pExpected.w, \
 result.x, result.y, result.z, result.w); \
+
+#define TEST_OUT_QUAT \
+TEST_OUT("{%f %f %f %f} and got {%f %f %f %f}", \
+pExpected.a, pExpected.b, pExpected.c, pExpected.d, \
+result.a, result.b, result.c, result.d); \
 
 #define TEST_OUT_MAT4 \
 float* r = result.mat16; \
@@ -61,15 +74,37 @@ errOutput += std::string("ERROR from ") + __FILE__ + " at line " + \
 std::to_string(__LINE__) + ": " + pFormat + "\n"; \
 snprintf(errBuffer, 512, errOutput.c_str(), __VA_ARGS__); \
 OutputDebugStringA(errBuffer); \
+return false; \
 } \
-else return;\
+else return true;\
 memset(errBuffer, 0, sizeof errBuffer); \
+
+#define TEST_SEQ_START(pSeqName) \
+testPassed = testFailed = 0; \
+{ \
+char buffer[512]; \
+memset(buffer, 0, sizeof buffer); \
+std::string output("\n#### "); \
+output += pSeqName; \
+output += " TEST SEQUENCE\n\n"; \
+OutputDebugStringA(output.c_str()); \
+} \
+
+#define TEST_SEQ_END() \
+{ \
+char buffer[1024]; \
+memset(buffer, 0, sizeof buffer); \
+snprintf(buffer, 1024, "\n#### PASSED: %d; FAILED: %d; TOTAL: %d;\n\n", \
+testPassed, testFailed, testPassed + testFailed); \
+OutputDebugStringA(buffer); \
+memset(buffer, 0, sizeof buffer); \
+} \
 
 #pragma endregion
 
 #pragma region Float2Test
 
-void Float2CrossProductTest
+bool Float2CrossProductTest
 (Float2 pA, Float2 pB, float pExpected) {
     TEST_START;
     float result = pA.CrossProduct(pB);
@@ -77,7 +112,7 @@ void Float2CrossProductTest
     TEST_OUT("%f and got %f", pExpected, result);
 }
 
-void Float2DotProductTest
+bool Float2DotProductTest
 (Float2 pA, Float2 pB, float pExpected) {
     TEST_START;
     float result = pA.DotProduct(pB);
@@ -85,7 +120,7 @@ void Float2DotProductTest
     TEST_OUT("%f and got %f", pExpected, result);
 }
 
-void Float2PlanRotationTest
+bool Float2PlanRotationTest
 (Float2 pA, float pAngle, Float2 pExpected) {
     TEST_START;
     Float2 result = pA;
@@ -94,14 +129,14 @@ void Float2PlanRotationTest
     TEST_OUT_VEC2;
 }
 
-void Float2MagnitudeTest(Float2 pA, float pExpected) {
+bool Float2MagnitudeTest(Float2 pA, float pExpected) {
     TEST_START;
     float result = pA.Magnitude();
     TEST_STOP;
     TEST_OUT("%f and got %f", pExpected, result);
 }
 
-void Float2NormalizeTest
+bool Float2NormalizeTest
 (Float2 pA, Float2 pExpected) {
     TEST_START;
     Float2 result = pA.GetNormalized();
@@ -109,7 +144,7 @@ void Float2NormalizeTest
     TEST_OUT_VEC2;
 }
 
-void Float2LerpTest
+bool Float2LerpTest
 (Float2 pFrom, Float2 pTo, float pTime, Float2 pExpected) {
     TEST_START;
     Float2 result = Float2::Lerp(pFrom, pTo, pTime);
@@ -117,7 +152,7 @@ void Float2LerpTest
     TEST_OUT_VEC2;
 }
 
-void Float2AddTest
+bool Float2AddTest
 (Float2 pA, Float2 pB, Float2 pExpected) {
     TEST_START;
     Float2 result = pA + pB;
@@ -125,7 +160,7 @@ void Float2AddTest
     TEST_OUT_VEC2;
 }
 
-void Float2SubTest
+bool Float2SubTest
 (Float2 pA, Float2 pB, Float2 pExpected) {
     TEST_START;
     Float2 result = pA - pB;
@@ -133,7 +168,7 @@ void Float2SubTest
     TEST_OUT_VEC2;
 }
 
-void Float2MulSTest
+bool Float2MulSTest
 (Float2 pA, float pB, Float2 pExpected) {
     TEST_START;
     Float2 result = pA * pB;
@@ -141,7 +176,7 @@ void Float2MulSTest
     TEST_OUT_VEC2;
 }
 
-void Float2DivSTest
+bool Float2DivSTest
 (Float2 pA, float pB, Float2 pExpected) {
     TEST_ERR((pB == 0.f), "TEST FAILED (ZERO DIVIDER) !");
     TEST_START;
@@ -154,7 +189,7 @@ void Float2DivSTest
 
 #pragma region Float3Test
 
-void Float3CrossProductTest
+bool Float3CrossProductTest
 (Float3 pA, Float3 pB, Float3 pExpected) {
     TEST_START;
     Float3 result = pA.CrossProduct(pB);
@@ -162,7 +197,7 @@ void Float3CrossProductTest
     TEST_OUT_VEC3;
 }
 
-void Float3DotProductTest
+bool Float3DotProductTest
 (Float3 pA, Float3 pB, float pExpected) {
     TEST_START;
     float result = pA.DotProduct(pB);
@@ -170,7 +205,7 @@ void Float3DotProductTest
     TEST_OUT("%f and got %f", pExpected, result);
 }
 
-void Float3MagnitudeTest
+bool Float3MagnitudeTest
 (Float3 pA, float pExpected) {
     TEST_START;
     float result = pA.Magnitude();
@@ -178,7 +213,7 @@ void Float3MagnitudeTest
     TEST_OUT("%f and got %f", pExpected, result);
 }
 
-void Float3NormalizeTest
+bool Float3NormalizeTest
 (Float3 pA, Float3 pExpected) {
     TEST_START;
     Float3 result = pA.GetNormalized();
@@ -186,7 +221,7 @@ void Float3NormalizeTest
     TEST_OUT_VEC3;
 }
 
-void Float3LerpTest
+bool Float3LerpTest
 (Float3 pFrom, Float3 pTo, float pTime, Float3 pExpected) {
     TEST_START;
     Float3 result = Float3::Lerp(pFrom, pTo, pTime);
@@ -194,7 +229,7 @@ void Float3LerpTest
     TEST_OUT_VEC3;
 }
 
-void Float3AddTest
+bool Float3AddTest
 (Float3 pA, Float3 pB, Float3 pExpected) {
     TEST_START;
     Float3 result = pA + pB;
@@ -202,7 +237,7 @@ void Float3AddTest
     TEST_OUT_VEC3;
 }
 
-void Float3SubTest
+bool Float3SubTest
 (Float3 pA, Float3 pB, Float3 pExpected) {
     TEST_START;
     Float3 result = pA - pB;
@@ -210,7 +245,7 @@ void Float3SubTest
     TEST_OUT_VEC3;
 }
 
-void Float3MulSTest
+bool Float3MulSTest
 (Float3 pA, float pB, Float3 pExpected) {
     TEST_START;
     Float3 result = pA * pB;
@@ -218,7 +253,7 @@ void Float3MulSTest
     TEST_OUT_VEC3;
 }
 
-void Float3DivSTest
+bool Float3DivSTest
 (Float3 pA, float pB, Float3 pExpected) {
     TEST_ERR((pB == 0.f), "TEST FAILED (ZERO DIVIDER) !");
     TEST_START;
@@ -231,7 +266,7 @@ void Float3DivSTest
 
 #pragma region Float4Test
 
-void Float4DotProductTest
+bool Float4DotProductTest
 (Float4 pA, Float4 pB, float pExpected) {
     TEST_START;
     float result = pA.DotProduct(pB);
@@ -239,7 +274,7 @@ void Float4DotProductTest
     TEST_OUT("%f and got %f", pExpected, result);
 }
 
-void Float4MagnitudeTest
+bool Float4MagnitudeTest
 (Float4 pA, float pExpected) {
     TEST_START;
     float result = pA.Magnitude();
@@ -247,7 +282,7 @@ void Float4MagnitudeTest
     TEST_OUT("%f and got %f", pExpected, result);
 }
 
-void Float4NormalizeTest
+bool Float4NormalizeTest
 (Float4 pA, Float4 pExpected) {
     TEST_START;
     Float4 result = pA.GetNormalized();
@@ -255,7 +290,7 @@ void Float4NormalizeTest
     TEST_OUT_VEC4;
 }
 
-void Float4AddTest
+bool Float4AddTest
 (Float4 pA, Float4 pB, Float4 pExpected) {
     TEST_START;
     Float4 result = pA + pB;
@@ -263,7 +298,7 @@ void Float4AddTest
     TEST_OUT_VEC4;
 }
 
-void Float4SubTest
+bool Float4SubTest
 (Float4 pA, Float4 pB, Float4 pExpected) {
     TEST_START;
     Float4 result = pA - pB;
@@ -271,7 +306,7 @@ void Float4SubTest
     TEST_OUT_VEC4;
 }
 
-void Float4MulSTest
+bool Float4MulSTest
 (Float4 pA, float pB, Float4 pExpected) {
     TEST_START;
     Float4 result = pA * pB;
@@ -279,7 +314,7 @@ void Float4MulSTest
     TEST_OUT_VEC4;
 }
 
-void Float4DivSTest
+bool Float4DivSTest
 (Float4 pA, float pB, Float4 pExpected) {
     TEST_ERR((pB == 0.f), "TEST FAILED (ZERO DIVIDER) !");
     TEST_START;
@@ -292,7 +327,7 @@ void Float4DivSTest
 
 #pragma region Mat4Test
 
-void Mat4GetRotationXTest
+bool Mat4GetRotationXTest
 (float pAngle, Mat4 pExpected) {
     TEST_START;
     Mat4 result = Mat4::GetRotationX(pAngle);
@@ -300,7 +335,7 @@ void Mat4GetRotationXTest
     TEST_OUT_MAT4;
 }
 
-void Mat4GetRotationYTest
+bool Mat4GetRotationYTest
 (float pAngle, Mat4 pExpected) {
     TEST_START;
     Mat4 result = Mat4::GetRotationX(pAngle);
@@ -308,7 +343,7 @@ void Mat4GetRotationYTest
     TEST_OUT_MAT4;
 }
 
-void Mat4GetRotationZTest
+bool Mat4GetRotationZTest
 (float pAngle, Mat4 pExpected) {
     TEST_START;
     Mat4 result = Mat4::GetRotationZ(pAngle);
@@ -316,7 +351,7 @@ void Mat4GetRotationZTest
     TEST_OUT_MAT4;
 }
 
-void Mat4GetRotationTest
+bool Mat4GetRotationTest
 (float pYaw, float pPitch, float pRoll, Mat4 pExpected) {
     TEST_START;
     Mat4 result = Mat4::GetRotation(pYaw, pPitch, pRoll);
@@ -324,7 +359,7 @@ void Mat4GetRotationTest
     TEST_OUT_MAT4;
 }
 
-void Mat4GetTranslationTest
+bool Mat4GetTranslationTest
 (Float3 pTranslation, Mat4 pExpected) {
     TEST_START;
     Mat4 result = Mat4::GetTranslation(pTranslation);
@@ -332,7 +367,7 @@ void Mat4GetTranslationTest
     TEST_OUT_MAT4;
 }
 
-void Mat4GetScaleTest
+bool Mat4GetScaleTest
 (Float3 pScale, Mat4 pExpected) {
     TEST_START;
     Mat4 result = Mat4::GetScale(pScale);
@@ -340,7 +375,7 @@ void Mat4GetScaleTest
     TEST_OUT_MAT4;
 }
 
-void Mat4TransformTest
+bool Mat4TransformTest
 (Float3 pPosition, Float3 pRotation, Float3 pScale, Mat4 pExpected) {
     TEST_START;
     Mat4 result = Mat4::CreateTransformMatrix(pPosition, pRotation, pScale);
@@ -348,7 +383,7 @@ void Mat4TransformTest
     TEST_OUT_MAT4;
 }
 
-void Mat4TransformQuatTest
+bool Mat4TransformQuatTest
 (Float3 pPosition, Quaternion pRotation, Float3 pScale, Mat4 pExpected) {
     TEST_START;
     Mat4 result = Mat4::CreateTransformMatrix(pPosition, pRotation, pScale);
@@ -356,7 +391,7 @@ void Mat4TransformQuatTest
     TEST_OUT_MAT4;
 }
 
-void Mat4OrthographicTest
+bool Mat4OrthographicTest
 (float pRight, float pLeft, float pTop, float pBottom, float pFar, float pNear, Mat4 pExpected) {
     TEST_START;
     Mat4 result = Mat4::GetOrthographicMatrix(pRight, pLeft, pTop, pBottom, pFar, pNear);
@@ -364,7 +399,7 @@ void Mat4OrthographicTest
     TEST_OUT_MAT4;
 }
 
-void Mat4PerspectiveTest
+bool Mat4PerspectiveTest
 (float pAspect, float pFOV, float pFar, float pNear, Mat4 pExpected) {
     TEST_START;
     Mat4 result = Mat4::GetPerspectiveMatrix(pAspect, pFOV, pFar, pNear);
@@ -372,7 +407,7 @@ void Mat4PerspectiveTest
     TEST_OUT_MAT4;
 }
 
-void Mat4TransposeTest
+bool Mat4TransposeTest
 (Mat4 pIn, Mat4 pExpected) {
     TEST_START;
     Mat4 result = pIn.GetTransposedMatrix();
@@ -380,7 +415,7 @@ void Mat4TransposeTest
     TEST_OUT_MAT4;
 }
 
-void Mat4InverseTest
+bool Mat4InverseTest
 (Mat4 pIn, Mat4 pExpected) {
     TEST_START;
     Mat4 result = pIn.GetInverseMatrix();;
@@ -388,7 +423,7 @@ void Mat4InverseTest
     TEST_OUT_MAT4;
 }
 
-void Mat4IdentityTest
+bool Mat4IdentityTest
 (Mat4 pExpected) {
     TEST_START;
     Mat4 result = Mat4::GetIdentityMatrix();;
@@ -396,7 +431,7 @@ void Mat4IdentityTest
     TEST_OUT_MAT4;
 }
 
-void Mat4MulTest
+bool Mat4MulTest
 (Mat4 pIn, Mat4 pOther, Mat4 pExpected) {
     TEST_START;
     Mat4 result = pIn * pOther;
@@ -404,7 +439,7 @@ void Mat4MulTest
     TEST_OUT_MAT4;
 }
 
-void Mat4MulSTest
+bool Mat4MulSTest
 (Mat4 pIn, float pOther, Mat4 pExpected) {
     TEST_START;
     Mat4 result = pIn * pOther;
@@ -412,12 +447,114 @@ void Mat4MulSTest
     TEST_OUT_MAT4;
 }
 
-void Mat4MulVTest
+bool Mat4MulVTest
 (Float4 pVec, Mat4 pIn, Float4 pExpected) {
     TEST_START;
     Float4 result = pVec * pIn;
     TEST_STOP;
     TEST_OUT_VEC4;
+}
+
+#pragma endregion
+
+#pragma region QuatTest
+
+bool QuatNormalizeTest
+(Quaternion pIn, Quaternion pExpected) {
+    TEST_START;
+    pIn.Normalize();
+    Quaternion result = pIn;
+    TEST_STOP;
+    TEST_OUT_QUAT;
+}
+
+bool QuatModulusTest
+(Quaternion pIn, float pExpected) {
+    TEST_START;
+    float result = pIn.Modulus();
+    TEST_STOP;
+    TEST_OUT("%f got %f", result, pExpected);
+}
+
+bool QuatSqrModulusTest
+(Quaternion pIn, float pExpected) {
+    TEST_START;
+    float result = pIn.SquaredModulus();
+    TEST_STOP;
+    TEST_OUT("%f got %f", result, pExpected);
+    
+}
+
+bool QuatToMatTest
+(Quaternion pIn, Mat4 pExpected) {
+    TEST_START;
+    Mat4 result = pIn.GetRotationMatrix();
+    TEST_STOP;
+    TEST_OUT_MAT4;
+}
+
+bool QuatHamiltonTest
+(Quaternion pRight, Quaternion pLeft, Quaternion pExpected) {
+    TEST_START;
+    Quaternion result = Quaternion::Hamilton(pRight, pLeft);
+    TEST_STOP;
+    TEST_OUT_QUAT;
+}
+
+bool QuatFromEulerTest
+(Float3 pEulerAngles, Quaternion pExpected) {
+    TEST_START;
+    Quaternion result = Quaternion::FromEuler(pEulerAngles);
+    TEST_STOP;
+    TEST_OUT_QUAT;
+}
+
+bool QuatToEulerTest
+(Quaternion pQuat, Float3 pExpected) {
+    TEST_START;
+    Float3 result = Quaternion::ToEuler(pQuat);
+    TEST_STOP;
+    TEST_OUT_VEC3;
+}
+
+bool QuatAngleAxisTest
+(Float3 pAxis, float pAngle, Quaternion pExpected) {
+    TEST_START;
+    Quaternion result = Quaternion::AngleAxis(pAxis, pAngle);
+    TEST_STOP;
+    TEST_OUT_QUAT;
+}
+
+bool QuatSLerpTest
+(Quaternion pFirst, Quaternion pSecond, float pTime, Quaternion pExpected) {
+    TEST_START;
+    Quaternion result = Quaternion::SLerp(pFirst, pSecond, pTime);
+    TEST_STOP;
+    TEST_OUT_QUAT;
+}
+
+bool QuatNLerpTest
+(Quaternion pFirst, Quaternion pSecond, float pTime, Quaternion pExpected) {
+    TEST_START;
+    Quaternion result = Quaternion::NLerp(pFirst, pSecond, pTime);
+    TEST_STOP;
+    TEST_OUT_QUAT;
+}
+
+bool QuatDotProductTest
+(Quaternion pFirst, Quaternion pSecond, float pExpected) {
+    TEST_START;
+    float result = Quaternion::DotProduct(pFirst, pSecond);
+    TEST_STOP;
+    TEST_OUT("%f got %f", result, pExpected);
+}
+
+bool QuatAddTest
+(Quaternion pIn, Quaternion pOther, Quaternion pExpected) {
+    TEST_START;
+    Quaternion result = pIn + pOther;
+    TEST_STOP;
+    TEST_OUT_QUAT;
 }
 
 #pragma endregion

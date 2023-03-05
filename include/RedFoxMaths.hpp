@@ -159,7 +159,6 @@ namespace RedFoxMaths
             x = f3.x;
             y = f3.y;
             z = f3.z;
-            
             w = 1;
         }
         
@@ -227,8 +226,8 @@ namespace RedFoxMaths
         Mat4 GetTransposedMatrix();
         
         float GetDeterminent();
-        Mat4 GetComplementaryMat(); //TO TEST
-        Mat4 GetCoMatrix();         //TO TEST
+        Mat4 GetComplementaryMat();
+        Mat4 GetCoMatrix();
         Mat4 GetInverseMatrix();
         static Mat4 GetIdentityMatrix();
         
@@ -275,7 +274,7 @@ namespace RedFoxMaths
         Float3 ToEuler();
         
         //Return a Quaternion from corresponding axis and radian pAngle
-        static Quaternion pAngleAxis(const Float3& pAxis, const float& pAngle);
+        static Quaternion AngleAxis(const Float3& pAxis, const float& pAngle);
         
         static Quaternion SLerp(const Quaternion& pFirst, const Quaternion& pSecond, float t);
         static Quaternion NLerp(const Quaternion& pFirst, const Quaternion& pSecond, float t);
@@ -285,8 +284,15 @@ namespace RedFoxMaths
         Quaternion operator*(const Quaternion& pOther) const;
         Quaternion operator*(const float& pOther) const;
         Quaternion operator+(const Quaternion& pOther) const;
+        
+        bool operator==(const Quaternion& pOther)
+        {
+            return (a <= pOther.a + FLOATCOMPACCURATE && a >= pOther.a - FLOATCOMPACCURATE) && 
+            (b <= pOther.b + FLOATCOMPACCURATE && b >= pOther.b - FLOATCOMPACCURATE) && 
+            (c <= pOther.c + FLOATCOMPACCURATE && c >=pOther.c - FLOATCOMPACCURATE) && 
+            (d <= pOther.d + FLOATCOMPACCURATE && d >=pOther.d - FLOATCOMPACCURATE);
+        }
     };
-    
     
 #pragma endregion
     
@@ -1373,7 +1379,7 @@ namespace RedFoxMaths
         };
     }
     
-    Quaternion Quaternion::pAngleAxis(const Float3& pAxis, const float& pAngle)
+    Quaternion Quaternion::AngleAxis(const Float3& pAxis, const float& pAngle)
     {
         Quaternion result;
         
