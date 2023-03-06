@@ -186,6 +186,8 @@ namespace RedFoxMaths
         public:
         Mat4();
         Mat4(float matrix[4][4]);
+        //TODO: mat16 constructor
+        //TODO: ptr constructor
         
         static Mat4 GetRotationX(const float& pAngle);
         static Mat4 GetRotationY(const float& pAngle);
@@ -529,8 +531,8 @@ namespace RedFoxMaths
         Float3 result;
         
         result.x = y * pOther.z - z * pOther.y;
-        result.y = x * pOther.z - z * pOther.x;
-        result.z = y * pOther.x - x * pOther.y;
+        result.y = z * pOther.x - x * pOther.z;
+        result.z = x * pOther.y - y * pOther.x;
         
         return result;
     }
@@ -713,7 +715,7 @@ namespace RedFoxMaths
     
     float Float4::Magnitude()
     {
-        return sqrtf(x * x + y * y + z * z);
+         return sqrtf(x * x + y * y + z * z + w * w);
     }
     
     void Float4::Normalize()
@@ -1234,11 +1236,11 @@ namespace RedFoxMaths
     
     bool Mat4::operator==(const Mat4& pOther)
     {
-        short int counter = 0;
+        short  counter = 0;
         for (int i=0; i < 16; i += 4)
         {
             bool check =
-                mat16[i]     == pOther.mat16[i]     &&
+                mat16[i]     == pOther.mat16[i]     && 
                 mat16[i + 1] == pOther.mat16[i + 1] &&
                 mat16[i + 2] == pOther.mat16[i + 2] &&
                 mat16[i + 3] == pOther.mat16[i + 3];
@@ -1313,10 +1315,10 @@ namespace RedFoxMaths
     {
         Quaternion result;
         
-        result.a = pRight.a * pLeft.a + pRight.b * pLeft.b + pRight.c * pLeft.c + pRight.d * pLeft.d;
-        result.b = pRight.a * pLeft.b + pRight.b * pLeft.a + pRight.c * pLeft.d + pRight.d * pLeft.c;
-        result.c = pRight.a * pLeft.c + pRight.b * pLeft.d + pRight.c * pLeft.a + pRight.d * pLeft.b;
-        result.d = pRight.a * pLeft.d + pRight.b * pLeft.c + pRight.c * pLeft.b + pRight.d * pLeft.a;
+        result.a = pRight.a * pLeft.a - pRight.b * pLeft.b - pRight.c * pLeft.c - pRight.d * pLeft.d;
+        result.b = pRight.a * pLeft.b + pRight.b * pLeft.a + pRight.c * pLeft.d - pRight.d * pLeft.c;
+        result.c = pRight.a * pLeft.c - pRight.b * pLeft.d + pRight.c * pLeft.a + pRight.d * pLeft.b;
+        result.d = pRight.a * pLeft.d + pRight.b * pLeft.c - pRight.c * pLeft.b + pRight.d * pLeft.a;
         
         return result;
     }
@@ -1334,8 +1336,8 @@ namespace RedFoxMaths
         
         result.a = cr * cp * cy + sr * sp * sy;
         result.b = sr * cp * cy - cr * sp * sy;
-        result.c = cr * sp * cy + sr * cp * sy;
-        result.d = cr * cp * sy - sr * sp * cy;
+        result.c = cr * cp * sy - sr * sp * cy;
+        result.d = cr * sp * cy + sr * cp * sy;
         
         return result;
     }
@@ -1353,8 +1355,8 @@ namespace RedFoxMaths
         
         result.a = cr * cp * cy + sr * sp * sy;
         result.b = sr * cp * cy - cr * sp * sy;
-        result.c = cr * sp * cy + sr * cp * sy;
-        result.d = cr * cp * sy - sr * sp * cy;
+        result.c = cr * sp * cy - sr * cp * sy;
+        result.d = cr * cp * sy + sr * sp * cy;
         
         return result;
     }

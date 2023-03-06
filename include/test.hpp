@@ -418,7 +418,7 @@ bool Mat4TransposeTest
 bool Mat4InverseTest
 (Mat4 pIn, Mat4 pExpected) {
     TEST_START;
-    Mat4 result = pIn.GetInverseMatrix();;
+    Mat4 result = pIn.GetInverseMatrix();
     TEST_STOP;
     TEST_OUT_MAT4;
 }
@@ -426,7 +426,7 @@ bool Mat4InverseTest
 bool Mat4IdentityTest
 (Mat4 pExpected) {
     TEST_START;
-    Mat4 result = Mat4::GetIdentityMatrix();;
+    Mat4 result = Mat4::GetIdentityMatrix();
     TEST_STOP;
     TEST_OUT_MAT4;
 }
@@ -435,6 +435,7 @@ bool Mat4MulTest
 (Mat4 pIn, Mat4 pOther, Mat4 pExpected) {
     TEST_START;
     Mat4 result = pIn * pOther;
+    result = result.GetTransposedMatrix();
     TEST_STOP;
     TEST_OUT_MAT4;
 }
