@@ -277,7 +277,7 @@ namespace RedFoxMaths
         Float3 ToEuler();
         
         //Return a Quaternion from corresponding axis and radian pAngle
-        static Quaternion AngleAxis(const Float3& pAxis, const float& pAngle);
+        static Quaternion AngleAxis(Float3& pAxis, const float& pAngle);
         
         static Quaternion SLerp(const Quaternion& pFirst, const Quaternion& pSecond, float t);
         static Quaternion NLerp(const Quaternion& pFirst, const Quaternion& pSecond, float t);
@@ -1382,16 +1382,16 @@ namespace RedFoxMaths
         };
     }
     
-    Quaternion Quaternion::AngleAxis(const Float3& pAxis, const float& pAngle)
+    Quaternion Quaternion::AngleAxis(Float3& pAxis, const float& pAngle)
     {
         Quaternion result;
-        
+        Float3 axis = pAxis.GetNormalized();
         float sinTetha = sin(pAngle / 2);
         
         result.a = cosf(pAngle / 2);
-        result.b = sinTetha * pAxis.x;
-        result.c = sinTetha * pAxis.y;
-        result.d = sinTetha * pAxis.z;
+        result.b = sinTetha * axis.x;
+        result.c = sinTetha * axis.y;
+        result.d = sinTetha * axis.z;
         
         return result;
     }
