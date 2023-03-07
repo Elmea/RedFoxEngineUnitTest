@@ -424,7 +424,7 @@ int main()
     {
         vec3 angles = {PI/2.f,PI/4.f,PI/8.f};
         mat4s mat = glms_mat4_identity();
-        glm_euler(angles, mat.raw);
+        glm_euler_xyz(angles, mat.raw);
         versors e = glms_mat4_quat(mat);
         Quaternion expected(e.w, e.x, e.y, e.z); 
         QuatFromEulerTest({PI/2.f,PI/4.f,PI/8.f}, expected);

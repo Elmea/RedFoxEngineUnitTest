@@ -8,6 +8,7 @@
 #define RAD2DEG 180/PI
 
 #define FLOATCOMPACCURATE 0.0001f
+
 #include <math.h>
 #include <cstdarg>
 
@@ -349,7 +350,7 @@ namespace RedFoxMaths
     // ----------------------------------------------------------- [Implementation] -----------------------------------------------------------
     
 #ifdef REDFOXMATHS_IMPLEMENTATION
-    
+
 #pragma region Float2
     
     float Float2::CrossProduct(Float2 pOther) const
@@ -1336,8 +1337,8 @@ namespace RedFoxMaths
         
         result.a = cr * cp * cy + sr * sp * sy;
         result.b = sr * cp * cy - cr * sp * sy;
-        result.c = cr * cp * sy - sr * sp * cy;
-        result.d = cr * sp * cy + sr * cp * sy;
+        result.c = cr * sp * cy + sr * cp * sy;
+        result.d = cr * cp * sy - sr * sp * cy;
         
         return result;
     }
@@ -1355,9 +1356,9 @@ namespace RedFoxMaths
         
         result.a = cr * cp * cy + sr * sp * sy;
         result.b = sr * cp * cy - cr * sp * sy;
-        result.c = cr * sp * cy - sr * cp * sy;
-        result.d = cr * cp * sy + sr * sp * cy;
-        
+        result.c = cr * sp * cy + sr * cp * sy;
+        result.d = cr * cp * sy - sr * sp * cy;
+
         return result;
     }
     
@@ -1400,27 +1401,16 @@ namespace RedFoxMaths
         return  pFirst.a * pSecond.a + pFirst.b * pSecond.b + pFirst.c * pSecond.c + pFirst.d * pSecond.d;
     }
     
-    //TODO : fix quternion lerp
     Quaternion Quaternion::SLerp(const Quaternion& pFirst, const Quaternion& pSecond, float t)
     {
-        float alpha = acosf(DotProduct(pFirst, pSecond));
+        float alpha = (float) acos(DotProduct(pFirst, pSecond));
+
+        if (alpha < 0.0f) alpha = -alpha;
+        if (alpha == 0.0f || isnan(alpha)) return pFirst;
+
         const float sinAlpha = sinf(alpha);
-        
-#if 0
-        const float sinInvTAlpha = sinf((1 - t) * alpha);
-        const float sinTAlpha = sinf(t * alpha);
-        
-        Quaternion result;
-        result.a = sinInvTAlpha / sinAlpha * pFirst.a + sinTAlpha / sinAlpha * pSecond.a;
-        result.b = sinInvTAlpha / sinAlpha * pFirst.b + sinTAlpha / sinAlpha * pSecond.b;
-        result.c = sinInvTAlpha / sinAlpha * pFirst.c + sinTAlpha / sinAlpha * pSecond.c;
-        result.d = sinInvTAlpha / sinAlpha * pFirst.d + sinTAlpha / sinAlpha * pSecond.d;
-        
-        result.Normalize();
-        
-        return result;
-#endif
-        
+        t = t / 2;
+
         return (pFirst * (sinf((1 - t) * alpha) / sinAlpha) + pSecond * (sinf(t * alpha) / sinAlpha)).GetNormalized();
     }
     

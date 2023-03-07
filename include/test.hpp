@@ -506,6 +506,7 @@ bool QuatFromEulerTest
 (Float3 pEulerAngles, Quaternion pExpected) {
     TEST_START;
     Quaternion result = Quaternion::FromEuler(pEulerAngles);
+    Float3 f3 = Quaternion::ToEuler(result);
     TEST_STOP;
     TEST_OUT_QUAT;
 }
