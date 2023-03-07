@@ -1,4 +1,5 @@
-#pragma once
+#ifndef REDFOXMATHS
+#define REDFOXMATHS
 
 #ifndef PI
 #define PI 3.14159265f
@@ -347,8 +348,9 @@ namespace RedFoxMaths
     }
 #pragma endregion
     
-    // ----------------------------------------------------------- [Implementation] -----------------------------------------------------------
     
+#endif
+    // ----------------------------------------------------------- [Implementation] -----------------------------------------------------------
 #ifdef REDFOXMATHS_IMPLEMENTATION
 
 #pragma region Float2
