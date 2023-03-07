@@ -378,7 +378,7 @@ namespace RedFoxMaths
     void Float2::Normalize()
     {
         float mag = Magnitude();
-        
+        if (mag == 0.f) return;
         x = x / mag;
         y = y / mag;
     }
@@ -386,7 +386,7 @@ namespace RedFoxMaths
     Float2 Float2::GetNormalized()
     {
         float mag = Magnitude();
-        
+        if (mag == 0.f) return Float2();
         return { x / mag, y / mag };
     }
     
@@ -551,7 +551,7 @@ namespace RedFoxMaths
     void Float3::Normalize()
     {
         float mag = Magnitude();
-        
+        if (mag == 0.f) return;
         x = x / mag;
         y = y / mag;
         z = z / mag;
@@ -560,7 +560,7 @@ namespace RedFoxMaths
     Float3 Float3::GetNormalized()
     {
         float mag = Magnitude();
-        
+        if (mag == 0.f) return Float3();
         return { x / mag, y / mag, z / mag };
     }
     
@@ -722,7 +722,7 @@ namespace RedFoxMaths
     void Float4::Normalize()
     {
         float mag = Magnitude();
-        
+        if (mag == 0.f) return;
         x = x / mag;
         y = y / mag;
         z = z / mag;
@@ -732,7 +732,7 @@ namespace RedFoxMaths
     Float4 Float4::GetNormalized()
     {
         float mag = Magnitude();
-        
+        if (mag == 0.f) return Float4();
         return { x / mag, y / mag, z / mag, w / mag };
     }
     
@@ -1286,7 +1286,7 @@ namespace RedFoxMaths
     void Quaternion::Normalize()
     {
         float mod = Modulus();
-        
+        if (mod == 0.f) return;
         a /= mod;
         b /= mod;
         c /= mod;
@@ -1307,7 +1307,7 @@ namespace RedFoxMaths
     Quaternion Quaternion::GetNormalized() const
     {
         float mod = Modulus();
-        
+        if (mod == 0.f) return Quaternion();
         return { a / mod, b / mod, c / mod, d / mod };
     }
     
@@ -1364,20 +1364,42 @@ namespace RedFoxMaths
     
     Float3 Quaternion::ToEuler(const Quaternion& quaternion)
     {
+        float sinp = 2 * (quaternion.a * quaternion.c - quaternion.d * quaternion.b);
+        float pitch = 0;
+        if (fabs(sinp) >= 1)
+        {
+            pitch = copysignf(PI / 2, sinp);
+        }
+        else
+        {
+            pitch = asinf(sinp);
+        }
+
         return
         {
             atan2f(2 * (quaternion.a * quaternion.b + quaternion.c * quaternion.d), 1 - 2 * (quaternion.b * quaternion.b + quaternion.c * quaternion.c)),
-            asinf(2 * (quaternion.a * quaternion.c - quaternion.d * quaternion.b)),
+            pitch,
             atan2f(2 * (quaternion.a * quaternion.d + quaternion.b * quaternion.c), 1 - 2 * (quaternion.c * quaternion.c + quaternion.d * quaternion.d))
         };
     }
     
     Float3 Quaternion::ToEuler()
     {
+        float sinp = 2 * (a * c - d * b);
+        float pitch = 0;
+        if (fabs(sinp) >= 1)
+        {
+            pitch = copysignf(PI / 2, sinp);
+        }
+        else
+        {
+            pitch = asinf(sinp);
+        }
+
         return
         {
             atan2f(2 * (a * b + c * d), 1 - 2 * (b * b + c * c)),
-            asinf(2 * (a * c - d * b)),
+            pitch,
             atan2f(2 * (a * d + b * c), 1 - 2 * (c * c + d * d))
         };
     }

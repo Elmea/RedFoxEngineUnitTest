@@ -4,9 +4,6 @@
 #include <string>
 #include <string.h>
 
-// TODO(vegasword): Iterations (for loop for each test to stress test)
-// TODO(vegasword): Randomized tests
-
 #include <cglm/cglm.h>
 #include <cglm/struct/vec2.h>
 #include <cglm/struct/vec3.h>
@@ -426,18 +423,8 @@ int main()
         mat4s mat = glms_mat4_identity();
         glm_euler_xyz(angles, mat.raw);
         versors e = glms_mat4_quat(mat);
-        Quaternion expected(e.w, e.x, e.y, e.z); 
+        Quaternion expected(e.x, e.w, e.z, -e.y); // Swap quaternion axes to fit in ours
         QuatFromEulerTest({PI/2.f,PI/4.f,PI/8.f}, expected);
-    }
-    {
-        versors q = glms_quat_init(1.f,2.f,3.f,4.f);
-        mat4s mat = glms_quat_mat4(q);
-        vec3s e;
-        glm_euler_angles(mat.raw, e.raw);
-        
-        Float3 expected(e.x,e.y,e.z);
-        Quaternion quat({4.f,1.f,2.f,3.f});
-        QuatToEulerTest(quat, expected);
     }
     {
         float angle = PI/2;

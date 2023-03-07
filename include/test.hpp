@@ -39,22 +39,22 @@ return false; \
 } \
 
 #define TEST_OUT_VEC2 \
-TEST_OUT("{%f %f} and got {%f %f}", \
+TEST_OUT("\n{%f %f}\nand got\n{%f %f}", \
 pExpected.x, pExpected.y, \
 result.x, result.y); \
 
 #define TEST_OUT_VEC3 \
-TEST_OUT("{%f %f %f} and got {%f %f %f}", \
+TEST_OUT("\n{%f %f %f}\nand got\n{%f %f %f}", \
 pExpected.x, pExpected.y, pExpected.z, \
 result.x, result.y, result.z); \
 
 #define TEST_OUT_VEC4 \
-TEST_OUT("{%f %f %f %f} and got {%f %f %f %f}", \
+TEST_OUT("\n{%f %f %f %f}\nand got\n{%f %f %f %f}", \
 pExpected.x, pExpected.y, pExpected.z, pExpected.w, \
 result.x, result.y, result.z, result.w); \
 
 #define TEST_OUT_QUAT \
-TEST_OUT("{%f %f %f %f} and got {%f %f %f %f}", \
+TEST_OUT("\n{%f %f %f %f}\nand got\n{%f %f %f %f}", \
 pExpected.a, pExpected.b, pExpected.c, pExpected.d, \
 result.a, result.b, result.c, result.d); \
 
@@ -514,7 +514,7 @@ bool QuatFromEulerTest
 bool QuatToEulerTest
 (Quaternion pQuat, Float3 pExpected) {
     TEST_START;
-    Float3 result = Quaternion::ToEuler(pQuat);
+    Float3 result = pQuat.ToEuler();
     TEST_STOP;
     TEST_OUT_VEC3;
 }
